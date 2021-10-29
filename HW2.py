@@ -220,9 +220,7 @@ def matrix_vector_multi(matrix,vector):
         result.append(0)
     
     for i in range(cols):
-        matrix[i] = scalar_vector_multi(matrix[i], vector[i])
-    for j in range(cols):
-        result = vector_addition(result, matrix[j])
+        result = vector_addition(result,scalar_vector_multi(matrix[i], vector[i]))
     return result
 
 #Problem 05
@@ -260,7 +258,6 @@ def matrix_matrix_multi(matrix_1, matrix_2):
     
     for i in range(cols_m2):
         result[i] = matrix_vector_multi(matrix_1, matrix_2[i])
-        print(result)
     return result
 
 
