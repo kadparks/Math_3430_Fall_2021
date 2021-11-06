@@ -16,7 +16,7 @@ an orthonormal list of vectors which shares the same span.
 """
 import LA
 
-def stable_gram(matrix):
+def stable_gram(matrix: list):
     """
     Produces QR factorization using Stable Gram-Schmidt method.
     
@@ -50,7 +50,7 @@ def stable_gram(matrix):
             V[j] = LA.vector_addition(V[j], LA.scalar_vector_multi(Q[i], -R[j][i]))
     return Q,R
 
-def orthonormal_vectors(vectors: list[list]):
+def orthonormal_vectors(vectors: list):
     """ 
     Orthonormalize a list of vectors.
     
@@ -64,5 +64,5 @@ def orthonormal_vectors(vectors: list[list]):
         Orthonormalized list of vectors Q, of our inout list of vectors.
     """
     
-    result = list[list] = stable_gram(vectors)
+    result: list[list] = stable_gram(vectors)[0]
     return result
