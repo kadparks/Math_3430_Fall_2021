@@ -45,7 +45,6 @@ def stable_gram(matrix):
     for i in range(len(matrix)):
         R[i][i] = LA.p_norm(V[i], )
         Q.append(LA.scalar_vector_multi(V[i], (1/R[i][i])))
-        print(Q)
         for j in range(i, len(matrix)):
             R[j][i] = LA.inner_product(Q[i], V[j])
             V[j] = LA.vector_addition(V[j], LA.scalar_vector_multi(Q[i], -R[j][i]))
