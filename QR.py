@@ -66,3 +66,205 @@ def orthonormal_vectors(vectors: list):
     
     result: list[list] = stable_gram(vectors)[0]
     return result
+
+#HW 7
+#Problem 1
+
+def conjugate_transpose(matrix: list):
+    """
+    Produces the conjugate transpose of our input matrix.
+    
+    First we create a new matrix of 0's with nxm dimensions. Then we use a double for loop to
+    call the correct column and row index, then we conjugate the value and overwrite it's proper
+    position in the result matrix.
+    
+    Arguements:
+        matrix: A matrix stored as a list of columns.
+    
+    Returns:
+        Conjugate Transpose of our input matrix.
+    """
+    
+    result: list[list[float]] = LA.new_matrix(len(matrix[-1]), len(matrix))
+    C: complex = 0
+    for i in range(len(matrix)):
+        for j in range(len(matrix[-1])):
+            C = matrix[i][j]
+            C = C.real + (C.imag*-1j)
+            result[j][i] = C
+    return result
+
+
+
+
+def matrix_identity(n: int):
+    """
+    Produces an indentity matrix with dimensions nxn.
+    
+    Arguements: 
+        n: An integer n.
+    
+    Returns:
+        An identity matrix with dimensions nxn.
+    """
+    
+    result: list[list[float]] = LA.new_matrix(n, n)
+    for i in range((n)):
+        result[i][i] = 1
+    return result
+
+
+
+
+def sign(number: float):
+    """
+    Returns the polarity of a number. If number is postive, returns 1. If number is negative,
+    returns -1.
+    
+    Arguements:
+        number: Any number.
+        
+    Returns:
+        The polarity of our input number.
+    """
+    
+    if number < 0:
+        return -1
+    else:
+        return 1
+
+
+
+
+def vector_vector_multi(vector_1:list, vector_2:list):
+    """
+    Produces (vv*/v*v)*2. First we set result equal to an empty list. Then we use a for loop to find 
+    the scalar vector multiplication of our second input vector with each element of our first input
+    vector, then appends new value into result.
+    
+    Arguements:
+        vector_1: A vector, stored as a list.
+        vector_2: A vector, stored as a list.
+    
+    Returns:
+        The product of our input vectors.   
+    """
+    
+    result: list = []
+    for i in range(len(vector_1)):
+        result.append(LA.scalar_vector_multi(vector_2, vector_1[i]))
+    return result
+
+
+
+
+def HH_V(vector:list):
+    """
+    Produces the reflection of our input vector, which will be used in our process to find Householder
+    decompositions.
+    
+    Arguements:
+        vector: A vector, stored as a list.
+        
+    Returns:
+        The reflection of our input vector.
+    """
+    
+    v: list[float] = []
+    for i in vector:
+      v.append(0)
+    v[0] = 1
+    result = LA.vector_addition(vector, LA.scalar_vector_multi(v, sign(vector[0])*LA.p_norm(vector)))
+    return result
+
+
+
+
+def HH_F(vector: list):
+    """
+    Calculates the F_k matrix used in Householder.
+    
+    First we find a scalar a that will be equal to -2 over the p_norm of our input vector squared. Second
+    we find a matrix b that is the product of scalar matrix multiplication with the inputs of the product of our
+    input vector times itself, and our scalar a. Third we find the sum of our matrix b and an identity matrix with
+    dimensions kxk, where k equals the length of our input vector.
+    
+    Arguements:
+        vector: A vector stored as a list.
+    
+    Returns:
+        F_k
+    """
+    
+    a = -2/(LA.p_norm(vector))**2
+    b = LA.scalar_matrix_multi(vector_vector_multi(vector, vector), a)
+    result = LA.matrix_addition(matrix_identity(len(vector)), b)
+    return result
+
+
+
+
+def HH_Q(matrix: list, k: int):
+    """
+    Calcualtes the Q_k matrix used in Householder.
+    
+    First we create new matrix of 0's, with the dimensions of our input matrix. Second we use for loops
+    to overwrite Q with the sum of our input scalar and matrix index in the approriate index, iff the sum is
+    less then the length of our matrix index. Third we set a variable v equal to the reflection of the first column
+    vector of Q, and a variable f equal to the F_k of our variable v. Fourth we set this function equal to an identity
+    matrix with the dimensions of the # of cols of our input matrix. Fifth we use for loops to overwrite our appropriate
+    indexes in HH_Q with difference between our indexes and our input scalar.
+    
+    Arguements:
+        matrix: A matrix, stored as a list of columns.
+        k:      An integer scalar
+    Returns:
+        Q_k
+    """
+    
+    Q: list[list] = LA.new_matrix(len(matrix), len(matrix[-1]))
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            if k+i < len(matrix[i]):
+                if k+j < len(matrix[i]):
+                    Q[i][j] = matrix[k+i][k+j]
+    v = HH_V(Q[0])
+    f = HH_F(v)
+    HH_Q = matrix_identity(len(matrix))
+    for i in range(k, len(HH_Q)):
+        for j in range(k, len(HH_Q)):
+            HH_Q[i][j] = f[i-k][j-k]
+    return HH_Q
+
+
+
+
+def HH(matrix: list):
+    """
+    Produces Householder QR decomposition
+    
+    First we set R equal to our input matrix and a variable Q_list equal to an empty list. Second we use a for
+    loop in the range of R to set Q_temp equal to the HH_Q of R and our index, set R equal to the matrix matrix 
+    multiplication of Q_temp and R, then finally append Q_temp into Q_list. Third we will set Q equal to the last
+    index in Q_list, then take the conjugate transpose of the first index of our new Q. Fourth we use another for 
+    loop in the range of 1 through the length of our Q_list to overwrite Q with the matrix matrix multiplication
+    of Q and the conjugate transpose of our appropriate Q_list index.
+   
+    Arguements:
+       matrix: A matrix, stored as a list of columns.
+    
+    Returns:
+        Two matrices, Q and R, in Householder QR decomposition.
+    """
+    
+    R: list[list] = matrix
+    Q_list: list = []
+    for i in range(len(R)):
+        Q_temp: list[list] = HH_Q(R, i)
+        R = LA.matrix_matrix_multi(Q_temp, R)
+        Q_list.append(Q_temp)
+    Q: list = Q_list[-1]
+    Q: list = conjugate_transpose(Q_list[0])
+    for i in range(1, len(Q_list)):
+        Q = LA.matrix_matrix_multi(Q, conjugate_transpose(Q_list[i]))
+    return [Q, R]
