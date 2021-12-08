@@ -1,0 +1,3 @@
+A disadvantage to using floating point arithmetic vs fixed point arithmetic is that floating point is not as fast and is more computationally demanding. An advantage to using
+floating point arithmetic over fixed point arithmetic is that floating point arithmetic is more flexibile and can represent a wider range of values when compared to fixed
+point arithmetic.
